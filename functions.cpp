@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-QByteArray parsing (QString data_from_client) {
+QByteArray parsing (QString &data_from_client) {
     QStringList data_from_client_list = data_from_client.split(QLatin1Char('&'));
     QString nameOfFunc = data_from_client_list.front();
     data_from_client_list.pop_front();
@@ -23,7 +23,7 @@ QByteArray auth (QString log, QString pass) {
 }
 
 QByteArray reg (QString log, QString pass, QString mail) {
-    if (log == "zenia" and pass == "111" and mail == "Zenia@gmail.com\r\n")
+    if (log == "zenia" and pass == "111" and mail == "zenia@gmail.com\r\n")
         return "done\r\n";
     else
         return "error3\r\n";
