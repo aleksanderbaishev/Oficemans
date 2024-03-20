@@ -3,23 +3,20 @@
 #include <QCoreApplication>
 #include <QString>
 #include "functions.h"
-MyTcpServer::~MyTcpServer()
-{
 
+MyTcpServer::~MyTcpServer() {
     mTcpServer->close();
-    //server_status=0;
 }
 
-MyTcpServer::MyTcpServer(QObject *parent) : QObject(parent){
+MyTcpServer::MyTcpServer(QObject *parent) : QObject(parent) {
     mTcpServer = new QTcpServer(this);
 
     connect(mTcpServer, &QTcpServer::newConnection,
             this, &MyTcpServer::slotNewConnection);
 
-    if(!mTcpServer->listen(QHostAddress::Any, 33333)){
+    if(!mTcpServer->listen(QHostAddress::Any, 33333)) {
         qDebug() << "server is not started";
     } else {
-        //server_status=1;
         qDebug() << "server is started";
     }
 }
@@ -40,10 +37,9 @@ void MyTcpServer::slotServerRead() {
 
     int descriptor = clientSocket->socketDescriptor();
     auto it = mClientSockets.find(descriptor);
-    if (it == mClientSockets.end()) return; // Если сокет не найден в map, выходим из функции
+    if (it == mClientSockets.end()) return;
 
-    // Теперь используем найденный сокет для чтения данных
-    clientSocket = it->second;
+    clientSocket = it.value();
     QString res = "";
     while(clientSocket->bytesAvailable() > 0) {
         QByteArray array = clientSocket->readAll();
@@ -57,12 +53,13 @@ void MyTcpServer::slotServerRead() {
     }
     if (!res.isEmpty()) {
         qDebug() << res;
-        clientSocket->write(parsing(res)); // Обработка и отправка ответа
+        clientSocket->write(parsing(res));
     }
 }
+
 void MyTcpServer::slotClientDisconnected() {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     int descriptor = clientSocket->socketDescriptor();
-    mClientSockets.erase(descriptor);
+    mClientSockets.remove(descriptor);
     clientSocket->deleteLater();
 }
