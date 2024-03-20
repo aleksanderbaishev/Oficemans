@@ -1,12 +1,11 @@
 #ifndef MYTCPSERVER_H
 #define MYTCPSERVER_H
+
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QtNetwork>
-#include <QByteArray>
-#include <QDebug>
-#include <map>
+#include <QMap> // Добавляем для использования QMap
+
 class MyTcpServer : public QObject
 {
     Q_OBJECT
@@ -19,7 +18,7 @@ public slots:
     void slotServerRead();
 private:
     QTcpServer * mTcpServer;
-    std::map<int, QTcpSocket*> mClientSockets;
-    //int server_status;
+    QMap<int, QTcpSocket*> mClientSockets;
 };
+
 #endif // MYTCPSERVER_H
