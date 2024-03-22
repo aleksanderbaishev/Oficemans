@@ -2,7 +2,7 @@
 #define AUTHREGFORM_H
 
 #include <QWidget>
-#include "functionsforclient.h"
+//#include "functionsforclient.h"
 namespace Ui {
 class AuthRegForm;
 }
