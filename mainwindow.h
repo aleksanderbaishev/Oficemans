@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "authregform.h"
+//#include "authregform.h"
 
 
 QT_BEGIN_NAMESPACE
