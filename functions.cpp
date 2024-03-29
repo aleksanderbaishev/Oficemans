@@ -1,30 +1,97 @@
-#include "functions.h"
-#include <QString>
+#include "function.h"
+#include <QStringList>
 #include <QDebug>
-#include <QCoreApplication>
+#include <regex>
+#include "database.h"
 
-QByteArray parsing (QString &data_from_client) {
-    QStringList data_from_client_list = data_from_client.split(QLatin1Char('&'));
-    QString nameOfFunc = data_from_client_list.front();
-    data_from_client_list.pop_front();
-    if (nameOfFunc == "auth")
-        return auth(data_from_client_list.at(0), data_from_client_list.at(1));
-    if (nameOfFunc == "reg")
-        return reg(data_from_client_list.at(0), data_from_client_list.at(1), data_from_client_list.at(2));
-    else
-        return "error1\r\n";
+bool isValidEmail(QString email)
+{
+    std::string email2 = email.trimmed().toUtf8().constData();
+    qDebug() << email2;
+    const std::regex emailPattern(
+        "(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$)");
+
+    return std::regex_match(email2, emailPattern);
 }
 
-QByteArray auth (QString log, QString pass) {
-    if (log == "zenia" and pass == "111\r\n")
-        return "done\r\n";
+QByteArray parsing(QString &data_from_client){
+    QStringList client_data_list = data_from_client.split("&");
+    QString func_name = client_data_list.front();
+
+    if (func_name.compare("auth") == 0)
+    {
+        client_data_list.pop_front();
+        return auth(client_data_list.at(0), client_data_list.at(1));
+    }
+    else if (func_name.compare("reg") == 0)
+    {
+        client_data_list.pop_front();
+        return reg(client_data_list.at(0), client_data_list.at(1), client_data_list.at(2));
+    }
     else
-        return "error2\r\n";
+    {
+        return "error\n";
+    }
 }
 
-QByteArray reg (QString log, QString pass, QString mail) {
-    if (log == "zenia" and pass == "111" and mail == "zenia@gmail.com\r\n")
-        return "done\r\n";
+QByteArray auth(QString log, QString pass)
+{
+    pass = pass.trimmed();
+    QStringList querySrc;
+    querySrc.append("SELECT login, password FROM users WHERE login == :login and password == :password;");
+    querySrc.append(":login");
+    querySrc.append(log);
+    querySrc.append(":password");
+    querySrc.append(pass);
+    qDebug()<<querySrc;
+    querySrc = Database::getInstance().queryToDatabase(querySrc);
+    if (querySrc.size() > 0)
+    {
+        return (QString("auth+&") + log + "\n").toUtf8();
+    }
     else
-        return "error3\r\n";
+    {
+        return "auth-\n";
+    }
+}
+
+QByteArray reg(QString log, QString pass, QString mail)
+{
+    if (isValidEmail(mail))
+    {
+        QStringList querySrc;
+        querySrc.append("SELECT login, password FROM users WHERE login == :login");
+        querySrc.append(":login");
+        querySrc.append(log);
+        querySrc.append(":password");
+        querySrc.append(pass);
+        querySrc = Database::getInstance().queryToDatabase(querySrc);
+        if (querySrc.size() > 0)
+        {
+            return "reg-\n";
+        }
+        else
+        {
+            querySrc.append("INSERT INTO users (login, password, email) VALUES (:login, :password, :email);");
+            querySrc.append(":login");
+            querySrc.append(log);
+            querySrc.append(":password");
+            querySrc.append(pass);
+            querySrc.append(":email");
+            querySrc.append(mail);
+            querySrc = Database::getInstance().queryToDatabase(querySrc);
+            if (querySrc.size() > 0)
+            {
+                return (QString("reg+&") + log + "\n").toUtf8();
+            }
+            else
+            {
+                return "failed to register user\n";
+            }
+        }
+    }
+    else
+    {
+        return "wrong email\n";
+    }
 }
