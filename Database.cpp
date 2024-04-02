@@ -52,8 +52,8 @@ QStringList Database::queryToDatabase(QStringList src){
 
     QStringList res;
     if(src[0].contains("SELECT")){
-        // qDebug() << query.exec();
-        // qDebug() << query.first();
+        qDebug() << query.exec();
+        qDebug() << query.first();
         if(query.exec() && query.first()){
             res.append("found");
             return res;
