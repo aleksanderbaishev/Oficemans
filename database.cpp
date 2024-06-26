@@ -9,6 +9,7 @@ Database::Database(){
     if (!db.open()) {
         qDebug() << "Error: failed to open database";
     }
+
 }
 
 bool Database::createTable(){
@@ -66,4 +67,4 @@ QStringList Database::queryToDatabase(QStringList src){
         }
     }
     return res;
-}
+}//database.cpp
